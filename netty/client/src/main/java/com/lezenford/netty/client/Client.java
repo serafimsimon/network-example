@@ -24,7 +24,7 @@ public class Client {
     }
 
     public void start() throws InterruptedException {
-//        for (int i = 0; i< 5; i++) {
+//        for (int i = 0; i < 5; i++) {
 //            THREAD_POOL.execute(() -> {
         final NioEventLoopGroup group = new NioEventLoopGroup();
         try {
@@ -42,13 +42,16 @@ public class Client {
             System.out.println("Client started");
 
             ChannelFuture channelFuture = bootstrap.connect("localhost", 9000).sync();
-
             while (true) {
                 final String message = String.format("[%s] %s", LocalDateTime.now(), Thread.currentThread().getName());
                 System.out.println("Try to send message: " + message);
                 channelFuture.channel().writeAndFlush(message + "\n");
-                channelFuture.channel().writeAndFlush(message + System.lineSeparator()).sync();
-                Thread.sleep(1000);
+                channelFuture.channel().writeAndFlush(message + System.lineSeparator());
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
