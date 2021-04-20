@@ -1,13 +1,16 @@
 package com.lezenford.netty.server;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.json.JsonObjectDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 
@@ -30,10 +33,17 @@ public class Server {
             server
                     .group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                    .childHandler(new ChannelInitializer<NioSocketChannel>() {
                         @Override
-                        protected void initChannel(SocketChannel ch) {
-                            ch.pipeline().addLast(new LineBasedFrameDecoder(256), new StringDecoder(), new StringEncoder(), new FirstServerHandler());
+                        protected void initChannel(NioSocketChannel ch) {
+                            ch.pipeline().addLast(
+                                    new LineBasedFrameDecoder(256),
+                                    new StringDecoder(),
+                                    new StringEncoder(),
+                                    new FirstServerHandler()
+                            );
+                            //in -> LineBasedFrameDecoder -> StringDecoder -> JsonObjectDecoder -> FirstServerHandler
+                            //JsonObjectEncoder -> StringEncoder -> out
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
