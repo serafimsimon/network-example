@@ -1,6 +1,8 @@
 package com.lezenford.io.client;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,13 +23,14 @@ public class Client {
             THREAD_POOL.submit(() -> {
                 try (Socket socket = new Socket("localhost", 9000);
                      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()))) {
+                    String threadName = Thread.currentThread().getName();
+                    System.out.println("Client started on thread: " + threadName);
                     while (true) {
-                        String threadName = Thread.currentThread().getName();
-                        System.out.println("Client started on thread: " + threadName);
                         writer.write("Message from " + threadName);
                         writer.newLine();
                         writer.flush();
-                        Thread.sleep(1000);
+                        System.out.println("Message receive from thread: " + threadName);
+                        Thread.sleep(5000);
                     }
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
