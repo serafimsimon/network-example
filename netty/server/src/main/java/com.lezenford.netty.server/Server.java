@@ -1,18 +1,16 @@
 package com.lezenford.netty.server;
 
+import com.lezenford.netty.common.handler.JsonDecoder;
+import com.lezenford.netty.common.handler.JsonEncoder;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.LineBasedFrameDecoder;
-import io.netty.handler.codec.json.JsonObjectDecoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 
 public class Server {
     private final int port;
@@ -37,13 +35,14 @@ public class Server {
                         @Override
                         protected void initChannel(NioSocketChannel ch) {
                             ch.pipeline().addLast(
-                                    new LineBasedFrameDecoder(256),
-                                    new StringDecoder(),
-                                    new StringEncoder(),
+                                    new LengthFieldBasedFrameDecoder(1024 * 1024, 0, 3, 0, 3),
+                                    new LengthFieldPrepender(3),
+                                    new JsonDecoder(),
+                                    new JsonEncoder(),
                                     new FirstServerHandler()
                             );
-                            //in -> LineBasedFrameDecoder -> StringDecoder -> JsonObjectDecoder -> FirstServerHandler
-                            //JsonObjectEncoder -> StringEncoder -> out
+                            //in -> LineBasedFrameDecoder -> JsonObjectDecoder -> FirstServerHandler
+                            //JsonObjectEncoder -> out
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)

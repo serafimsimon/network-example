@@ -12,6 +12,8 @@ application {
 dependencies {
     // https://mvnrepository.com/artifact/io.netty/netty-all
     implementation("io.netty:netty-all:4.1.59.Final")
+
+    implementation(project(":netty:common"))
 }
 
 repositories {
