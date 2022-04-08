@@ -7,7 +7,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -59,6 +58,6 @@ public class Server {
         ByteBuffer byteBuffer = ByteBuffer.allocate(256);
         client.read(byteBuffer);
         String message = new String(byteBuffer.array());
-        System.out.println("New message: " + message + "Thread name: " + Thread.currentThread().getName());
+        System.out.println("New message: " + message + " Thread name: " + Thread.currentThread().getName());
     }
 }
