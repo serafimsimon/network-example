@@ -7,10 +7,18 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UTFDataFormatException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Scanner;
 
 public class Client {
 
@@ -53,10 +61,12 @@ public class Client {
             Channel channel = bootstrap.connect("localhost", 9000).sync().channel();
 
             while (channel.isActive()) {
-                ByteBuf msg = Unpooled.wrappedBuffer(("Hello world! " + new Date()).getBytes(StandardCharsets.UTF_8));
+                Scanner newScanner = new Scanner(System.in);
+                String newData = newScanner.nextLine();
+                ByteBuf msg = Unpooled.copiedBuffer(newData.toString().getBytes(StandardCharsets.UTF_8));
                 channel.write(msg);
                 channel.flush();
-                Thread.sleep(3000);
+                //Thread.sleep(3000);
             }
 
             channel.closeFuture().sync();
