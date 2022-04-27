@@ -2,10 +2,14 @@ package com.lezenford.netty.simple.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.CharsetUtil;
+
+import java.nio.charset.StandardCharsets;
 
 public class Server {
     private final int port;
@@ -24,6 +28,7 @@ public class Server {
         //ThreadPool обслуживающий всех активных клиентов
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
+
             ServerBootstrap server = new ServerBootstrap();
             server
                     .group(bossGroup, workerGroup)
@@ -57,12 +62,18 @@ public class Server {
                                         @Override
                                         public void channelRead(ChannelHandlerContext ctx, Object msg) {
                                             System.out.println("channelRead");
-                                            final ByteBuf m = (ByteBuf) msg;
-                                            for (int i = m.readerIndex(); i < m.writerIndex(); i++) {
-                                                System.out.print((char) m.getByte(i)); //читаем данные из буфера так, чтобы не сдвинуть индексы
+                                            final ByteBuf byteB = (ByteBuf) msg;
+
+                                            for (int i = byteB.readerIndex(); i < byteB.writerIndex(); i++) {
+                                                byte b = byteB.getByte(i);
+                                                System.out.print((char) b); //читаем данные из буфера так, чтобы не сдвинуть индексы
+                                                if ("/n".equals(Byte.toString(((ByteBuf) msg).getByte(i)))) {
+                                                    return;
+                                                }
                                             }
                                             System.out.flush();
                                             System.out.println();
+
                                             ctx.writeAndFlush(msg); //Отправка сообщения обратно клиенту
                                         }
 
