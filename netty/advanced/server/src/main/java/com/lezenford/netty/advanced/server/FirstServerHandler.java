@@ -1,5 +1,6 @@
 package com.lezenford.netty.advanced.server;
 
+import com.lezenford.netty.advanced.common.message.AuthMessage;
 import com.lezenford.netty.advanced.common.message.DateMessage;
 import com.lezenford.netty.advanced.common.message.Message;
 import com.lezenford.netty.advanced.common.message.TextMessage;
@@ -18,6 +19,19 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
+
+        if (msg instanceof AuthMessage) {
+            AuthMessage message = (AuthMessage) msg;
+            if ("AAA".equals(message.getLogin()) && "111".equals(message.getPassword())){;
+
+            System.out.println("Success authentication! Welcome to server!");
+
+            ctx.writeAndFlush(msg);}
+        else {
+            System.out.println("!!!Wrong authentication!!!");
+            ctx.close();}
+        }
+
         if (msg instanceof TextMessage) {
             TextMessage message = (TextMessage) msg;
             System.out.println("incoming text message: " + message.getText());

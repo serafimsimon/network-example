@@ -18,4 +18,5 @@ public class JsonDecoder extends MessageToMessageDecoder<ByteBuf> {
         Message message = OBJECT_MAPPER.readValue(bytes, Message.class);
         out.add(message);
     }
+
 }

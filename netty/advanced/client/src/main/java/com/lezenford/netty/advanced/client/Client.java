@@ -2,6 +2,7 @@ package com.lezenford.netty.advanced.client;
 
 import com.lezenford.netty.advanced.common.handler.JsonDecoder;
 import com.lezenford.netty.advanced.common.handler.JsonEncoder;
+import com.lezenford.netty.advanced.common.message.AuthMessage;
 import com.lezenford.netty.advanced.common.message.DateMessage;
 import com.lezenford.netty.advanced.common.message.Message;
 import com.lezenford.netty.advanced.common.message.TextMessage;
@@ -13,8 +14,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Scanner;
 
 public class Client {
 
@@ -43,7 +46,7 @@ public class Client {
                                     new SimpleChannelInboundHandler<Message>() {
                                         @Override
                                         protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
-                                            System.out.println("receive msg " + msg);
+                                            //System.out.println("receive msg " + msg);
                                         }
                                     }
                             );
@@ -54,7 +57,21 @@ public class Client {
 
             Channel channel = bootstrap.connect("localhost", 9000).sync().channel();
 
+            InputStream inputStream = System.in;
+            Reader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            System.out.println("Enter login");
+            String logg = bufferedReader.readLine(); //читаем логин с клавиатуры;
+            System.out.println("Enter password");
+            String pass = bufferedReader.readLine(); //читаем пароль с клавиатуры;
+
+            AuthMessage authMessage = new AuthMessage();
+            authMessage.setLogin(String.format(logg));
+            authMessage.setPassword(String.format(pass));
+            channel.writeAndFlush(authMessage);
+
             while (channel.isActive()) {
+
                 TextMessage textMessage = new TextMessage();
                 textMessage.setText(String.format("[%s] %s", LocalDateTime.now(), Thread.currentThread().getName()));
                 System.out.println("Try to send message: " + textMessage);
@@ -71,6 +88,8 @@ public class Client {
             channel.closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         } finally {
             group.shutdownGracefully();
         }
